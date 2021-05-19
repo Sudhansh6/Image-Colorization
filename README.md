@@ -102,8 +102,8 @@ def SGD(self, training_data, epochs, mini_batch_size, eta,
                     j, self.evaluate(test_data), n_test)
             else:
                 print "Epoch {0} complete".format(j)
-  ```
-  
+```
+
   **The Back Propagation Algorithm** 
   ```python
   def backprop(self, x, y):
@@ -140,7 +140,7 @@ def SGD(self, training_data, epochs, mini_batch_size, eta,
             nabla_b[-l] = delta
             nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
         return (nabla_b, nabla_w)
-```
+  ```
 *Note* Back Propagation was not discussed until here. It will be discussed in the next chapter.
 
 ### Observations
