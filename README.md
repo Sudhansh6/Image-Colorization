@@ -3,47 +3,39 @@
 The SoC 2021 project.
 
 # Useful Links
-
-A Machine Learning course [here](https://www.coursera.org/learn/machine-learning)  
+A Machine Learning course [Here](https://www.coursera.org/learn/machine-learning)  
 Notes on Machine Learning [here](http://cs229.stanford.edu/summer2019/cs229-notes1.pdf)
 
 # Linear Regression
-
 The main aim is to estimate a linear equation representing the given set of data. There are two approaches to this.   
-
 1. A closed form solution.  
    This can be directly obtained by solving the linear differential equation.
 2. An iterative approach.  
-   This is similar to **Gradient Descent**. We try to obtain the minima ($L1$, $L2$ norm etc) by calculating the gradient at each point and moving in small steps along the gradient vector. 
-   Refer to [this](https://youtu.be/8PJ24SrQqy8) video for more details. 
-
+    This is similar to **Gradient Descent**. We try to obtain the minima ($L1$, $L2$ norm etc) by calculating the gradient at each point and moving in small steps along the gradient vector. 
+Refer to [this](https://youtu.be/8PJ24SrQqy8) video for more details. 
 ## Logistic Regression
-
 Refer to the following [link](https://towardsdatascience.com/logistic-regression-detailed-overview-46c4da4303bc) to see an example of logistic regression.
 
 # Gradient Descent
-
 [Here](https://youtu.be/sDv4f4s2SB8) is a useful video.  
 An article about Gradient Descent [here](https://medium.com/@lachlanmiller_52885/machine-learning-week-1-cost-function-gradient-descent-and-univariate-linear-regression-8f5fe69815fd)  
 A useful post on GeeksForGeeks [here](https://www.geeksforgeeks.org/gradient-descent-algorithm-and-its-variants/)  
 
 # Deep Learning
-
 A book on deep learning [here](http://neuralnetworksanddeeplearning.com/index.html)
 
 ## Chapter 1 - Using neural nets to recognize handwritten digits
 
 ### Perceptrons  
+#### So how do perceptrons work? 
 
-#### So how do perceptrons work? A perceptron takes several binary inputs, $x_1,x_2,…,x_n$ and produces a single binary output.
-
+A perceptron takes several binary inputs, $$x_1,x_2,…,x_n$$ and produces a single binary output.
 $$
 output = \begin{cases}
 			0 & \text{ if } \sum_j{w_jx_j} \leq \text{threshold}\\
 			1 & \text{ if } \sum_j{w_jx_j} > \text{threshold}
 		\end{cases}
 $$
-
 
 A way you can think about the perceptron is that it's a device that makes decisions by weighing up the evidence. By varying the weights and the threshold, we can get different models of decision-making. Using the bias instead of the threshold, the perceptron rule can be rewritten:  
 $$
@@ -55,8 +47,7 @@ $$
 Another way perceptrons can be used is to compute the elementary logical functions we usually think of as underlying computation, functions such as AND, OR, and NAND.  
 
 ### Sigmoid Neurons
-
-A small change in the weights or bias of any single perceptron in the network can sometimes cause the output of that perceptron to completely flip, say from 0 to 1. We can overcome this problem by introducing a new type of artificial neuron called a sigmoid neuron. Sigmoid neurons are similar to perceptrons, but modified so that small changes in their weights and bias cause only a small change in their output. That's the crucial fact which will allow a network of sigmoid neurons to learn.  
+A small change in the weights or bias of any single perceptron in the network can sometimes cause the output of that perceptron to completely flip, say from $$0$$ to $$1$$. We can overcome this problem by introducing a new type of artificial neuron called a sigmoid neuron. Sigmoid neurons are similar to perceptrons, but modified so that small changes in their weights and bias cause only a small change in their output. That's the crucial fact which will allow a network of sigmoid neurons to learn.  
 Just like a perceptron, the sigmoid neuron has inputs, $x_1, x_2, \dots$ But instead of being just 0 or 1, these inputs can also take on any values between $0$ and $1$. So, for instance, $0.638 \dots$ is a valid input for a sigmoid neuron. Also just like a perceptron, the sigmoid neuron has weights for each input, $w_1, w_2, \dots,$ and an overall bias, $b$. But the output is not $0$ or $1$. Instead, it's $\sigma(w\cdot x + b)$, where σ is called the sigmoid function.  
 To understand the similarity to the perceptron model, suppose z≡w⋅x+b is a large positive number. Then e−z≈0 and so σ(z)≈1. In other words, when z=w⋅x+b is large and positive, the output from the sigmoid neuron is approximately 1, just as it would have been for a perceptron. Suppose on the other hand that z=w⋅x+b is very negative. Then e−z→∞, and σ(z)≈0. So when z=w⋅x+b is very negative, the behaviour of a sigmoid neuron also closely approximates a perceptron.  
 
@@ -73,15 +64,13 @@ Here, $\eta$ refers to the **learning rate** and is one of the _hyperparameters_
 
 In the above algorithm, we calculated the cost function for all the inputs in each iteration. This turns out to be a computationally expensive step. Therefore, we select a **mini-batch** from the input and evaluate the cost function over this input. We assume that this cost function is a representative of the real cost function. We change the mini-batch in each iteration so as to cover all the inputs. The change in the cost function looks like this:  
 ![image](https://user-images.githubusercontent.com/52414199/118255671-2b6eb080-b4ca-11eb-9bde-5bf813c25d1d.png)  
-*Note* The above cost function is taken as an average to maintina consistency in the mini-batches method.
+*Note* The above cost function is taken as an average to maintain consistency in the mini-batches method.
 
 In summary, we take a random set of weights and biases and perform gradient descent on a subset of inputs to obtain the optimal set of parameters. This method is called as **Stochastic Gradient Descent**. (Stochastic refers to the random initial start and random mini-batches).
 
 ### Implementation of Neural Networks
-
 The following code is taken from the book. We implement Neural Networks in Python for the rest of the document.  
 **The Network Class**  
-
 ```python
 class Network(object):
 
@@ -94,7 +83,6 @@ class Network(object):
 ```
 
 **The FeedForward Mechanism**  
-
 ```python
 def feedforward(self, a):
         """Return the output of the network if "a" is input."""
@@ -104,7 +92,6 @@ def feedforward(self, a):
 ```
 
 **The Stochastic Gradient Descent Method**  
-
 ```python
 def SGD(self, training_data, epochs, mini_batch_size, eta,
             test_data=None):
@@ -133,7 +120,6 @@ def SGD(self, training_data, epochs, mini_batch_size, eta,
 ```
 
   **The Back Propagation Algorithm** 
-
   ```python
   def backprop(self, x, y):
         """Return a tuple ``(nabla_b, nabla_w)`` representing the
@@ -170,11 +156,9 @@ def SGD(self, training_data, epochs, mini_batch_size, eta,
             nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
         return (nabla_b, nabla_w)
   ```
-
 *Note.* Back Propagation was not discussed until here. It will be discussed in the next chapter.
 
 ### Observations
-
 The weights and biases are called as *parameters* whereas the size of a mini-batch, number of epochs (The number of times SGD is repeated over the whole input) and learning rate are called as *hyperparameters*. These hyperparameters play a crucial role in the time taken for training the network. They must be chosen with care and they can be tuned based on the observation made from the output. 
 
 A deep neural network is able to learn complex data due to its hierarchical structure. Each layer captures a level of abstraction which is used by the next layer to determine a higher level of features in the data. 
@@ -182,5 +166,8 @@ A deep neural network is able to learn complex data due to its hierarchical stru
 ## Chapter 2 - How the backpropagation algorithm works
 
 ### A Matrix based approach for faster calculations
+All the above equations in the network are written in terms of summations. We can easily replace them using matrix representation. This allows faster calculations and does away with indices. The notation is w<sup>l</sup>_{jk} to denote the weight for the connection from the kth neuron in the (l−1)th layer to the jth neuron in the lth layer. 
 
-All the above equations in the network are written in terms of summations. We can easily replace them using matrix representation. This allows faster calculations and does away with indices. The notation is w<sup>l</sup>_{jk} to denote the weight for the connection from the kth neuron in the (l−1)th layer to the jth neuron in the lth layer.
+*Note.* Pay attention to the reverse notation.
+
+![image-20210519132122776](/home/sudhansh/.config/Typora/typora-user-images/image-20210519132122776.png)
