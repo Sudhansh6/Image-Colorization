@@ -189,7 +189,42 @@ def SGD(self, training_data, epochs, mini_batch_size, eta,
 ```
 
 **The Back Propagation Algorithm**
-``` python   def backprop(self, x, y):         """Return a tuple ``(nabla_b, nabla_w)`` representing the         gradient for the cost function C_x.  ``nabla_b`` and         ``nabla_w`` are layer-by-layer lists of numpy arrays, similar         to ``self.biases`` and ``self.weights``."""         nabla_b = [np.zeros(b.shape) for b in self.biases]         nabla_w = [np.zeros(w.shape) for w in self.weights]         # feedforward         activation = x         activations = [x] # list to store all the activations, layer by layer         zs = [] # list to store all the z vectors, layer by layer         for b, w in zip(self.biases, self.weights):             z = np.dot(w, activation)+b             zs.append(z)             activation = sigmoid(z)             activations.append(activation)         # backward pass         delta = self.cost_derivative(activations[-1], y) * \             sigmoid_prime(zs[-1])         nabla_b[-1] = delta         nabla_w[-1] = np.dot(delta, activations[-2].transpose())         # Note that the variable l in the loop below is used a little         # differently to the notation in Chapter 2 of the book.  Here,         # l = 1 means the last layer of neurons, l = 2 is the         # second-last layer, and so on.  It's a renumbering of the         # scheme in the book, used here to take advantage of the fact         # that Python can use negative indices in lists.         for l in xrange(2, self.num_layers):             z = zs[-l]             sp = sigmoid_prime(z)             delta = np.dot(self.weights[-l+1].transpose(), delta) * sp             nabla_b[-l] = delta             nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())         return (nabla_b, nabla_w) ```
+``` python   
+def backprop(self, x, y):         
+    """Return a tuple ``(nabla_b, nabla_w)`` representing the         
+    gradient for the cost function C_x.  ``nabla_b`` and         
+    ``nabla_w`` are layer-by-layer lists of numpy arrays, similar         
+    to ``self.biases`` and ``self.weights``."""         
+    nabla_b = [np.zeros(b.shape) for b in self.biases]         
+    nabla_w = [np.zeros(w.shape) for w in self.weights]         
+    # feedforward         
+    activation = x         
+    activations = [x] # list to store all the activations, layer by layer         
+    zs = [] # list to store all the z vectors, layer by layer         
+    for b, w in zip(self.biases, self.weights):             
+        z = np.dot(w, activation)+b             
+        zs.append(z)             
+        activation = sigmoid(z)             
+        activations.append(activation)         
+    # backward pass         
+    delta = self.cost_derivative(activations[-1], y) * \             
+        sigmoid_prime(zs[-1])         
+    nabla_b[-1] = delta         
+    nabla_w[-1] = np.dot(delta, activations[-2].transpose())         
+    # Note that the variable l in the loop below is used a little         
+    # differently to the notation in Chapter 2 of the book.  Here,         
+    # l = 1 means the last layer of neurons, l = 2 is the         
+    # second-last layer, and so on.  It's a renumbering of the         
+    # scheme in the book, used here to take advantage of the fact         
+    # that Python can use negative indices in lists.         
+    for l in xrange(2, self.num_layers):             
+        z = zs[-l]             
+        sp = sigmoid_prime(z)             
+        delta = np.dot(self.weights[-l+1].transpose(), delta) * sp             
+        nabla_b[-l] = delta             
+        nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())         
+   return (nabla_b, nabla_w) 
+```
 *Note* Back Propagation was not discussed until here. It will be
 discussed in the next chapter.
 
@@ -220,7 +255,7 @@ to denote the weight for the connection from the
 *k*
 th neuron in the (*l*−1)th layer to the *j*th neuron in the *l*th layer.
 
-![image-20210519162827182](/home/sudhansh/Misc%20Projects/SoC%20-%20Image%20Colorization/README.assets/image-20210519162827182.png)
+![image-20210519162827182](README.assets/image-20210519162827182.png)
 
 *Note.* The notation is reverse from what is expected.
 
@@ -249,13 +284,13 @@ The Hadamard/Schur product is defined as
 Let us get familiar with some notation before moving forward. We define
 *δ*<sub>*j*</sub><sup>*l*</sup> of neuron *j* in layer *l* by,
 
-![image-20210519164628397](/home/sudhansh/Misc%20Projects/SoC%20-%20Image%20Colorization/README.assets/image-20210519164628397.png)
+![image-20210519164628397](README.assets/image-20210519164628397.png)
 
 It represents the change in the cost function when
 *z*<sub>*j*</sub><sup>*l*</sup> is changed. The equations are as
 follows:
 
-1.  ![image-20210519164817114](/home/sudhansh/Misc%20Projects/SoC%20-%20Image%20Colorization/README.assets/image-20210519164817114.png)
+1.  ![image-20210519164817114](README.assets/image-20210519164817114.png)
 
     Notice that *B**P*1 can be easily calculated if we know the partial
     derivative in the above equation. It can be rewritten in the matrix
@@ -264,7 +299,7 @@ follows:
     above equation only talks about the output and change in the output
     layer!
 
-2.  ![image-20210519165158598](/home/sudhansh/Misc%20Projects/SoC%20-%20Image%20Colorization/README.assets/image-20210519165158598.png)
+2.  ![image-20210519165158598](README.assets/image-20210519165158598.png)
 
     It represents the change in *z*<sup>*l* + 1</sup> with respect to a
     change in *z*<sup>*l*</sup>. By combining *B**P*2 with *B**P*1 we
@@ -275,13 +310,13 @@ follows:
     *δ*<sup>*l* − 1</sup>, and so on, all the way back through the
     network.
 
-3.  ![image-20210519165613369](/home/sudhansh/Misc%20Projects/SoC%20-%20Image%20Colorization/README.assets/image-20210519165613369.png)
+3.  ![image-20210519165613369](README.assets/image-20210519165613369.png)
 
     Until now, the equations were written in terms of the output at each
     neuron. The above equation holds due to the definition of
     *δ*<sub>*j*</sub><sup>*l*</sup>.
 
-4.  ![image-20210519165853795](/home/sudhansh/Misc%20Projects/SoC%20-%20Image%20Colorization/README.assets/image-20210519165853795.png)
+4.  ![image-20210519165853795](README.assets/image-20210519165853795.png)
 
     This equation is similar to the previous one. Each
     *w*<sub>*j**k*</sub><sup>*l*</sup> is associated with the output
@@ -307,4 +342,4 @@ follows:
 
 The equations are summarised as:
 
-![image-20210519170510043](/home/sudhansh/Misc%20Projects/SoC%20-%20Image%20Colorization/README.assets/image-20210519170510043.png)
+![image-20210519170510043](README.assets/image-20210519170510043.png)
