@@ -20,8 +20,9 @@ This is similar to **Gradient Descent**. We try to obtain the minima (
 *L*1, *L*2
 norm etc) by calculating the gradient at each point and moving in small
 steps along the gradient vector. Refer to
-[this](https://youtu.be/8PJ24SrQqy8) video for more details. \#\#
-Logistic Regression Refer to the following
+[this](https://youtu.be/8PJ24SrQqy8) video for more details. 
+## Logistic Regression 
+Refer to the following
 [link](https://towardsdatascience.com/logistic-regression-detailed-overview-46c4da4303bc)
 to see an example of logistic regression.
 
@@ -328,7 +329,7 @@ follows:
 #### Conclusions from the above Equations
 
 -   When the activation *a*in is small, *a*in≈0, the gradient term
-    ∂*C*/∂*w* will also tend to be small.
+    ∂*C*/∂*w* will also tend to be small. This is true for any cost function.
 -   A weight in the final layer will learn slowly if the output neuron
     is either low activation (≈0) or high activation (≈1). In this case
     it’s common to say the output neuron has *saturated* and, as a
@@ -336,10 +337,96 @@ follows:
     Similar remarks hold also for the biases of output neuron. We can
     obtain similar insights for earlier layers. And this, in turn, means
     that any weights input to a saturated neuron will learn slowly (if
-    the number of inputs is small).
+    the number of inputs is small).  
+    **Note** This conclusion holds true only for sigmoid neurons.
 -   The four fundamental equations turn out to hold for any activation
     function, not just the standard sigmoid function.
 
 The equations are summarised as:
 
 ![image-20210519170510043](README.assets/image-20210519170510043.png)
+
+### Advantages of Back Propagation  
+This algorithm is extremely fast as it requires only one forward pass and one backward pass. If we were to solve this problem conventionally, we would have proceeded in the following manner. For each weight and bias in the network, we would have calculated the change in the output/cost function with respect to to the change in the parameter being considered. This is basically from the first principles of calculus. Notice that we repeat this process for each weight and bias and the network. If there were a million parameters, we would have million forward and backward passes.  
+The elegancy of Back propagation is visible in this scenario. We calculate the gradients of all parameters in a single go. Therefore, Back Propagation provides an intuitive and simple method to train our network via gradient descent.  
+
+## Chapter 3 - Improving the way neural networks learn  
+Content in this chapter: Improving cost functions - cross-entropy cost function; Regularization methods - L1, L2, dropout, artificial expansion of training data; Weights initializationl Heuristics for hyperparameters.
+
+### The cross entropy cost function
+Usually, humans learn faster when they make bigger errors. Although, neural networks are not so simple and they behave differently. From the example given in the book, the network (with a single neuron) is learning slowly when the error is high.  
+This fact can be attributed to the shape of the sigmoid function. In one of our previous conclusions, we've written down that the network learns slowly when a neuron is near saturation. The shape of the sigmoid flattens near the ends.  
+Although, this is not solely due to the sigmoid function. When the gradient of the quadratic cost function is calculated, the derivative activation term remains. Therefore, the quadratic cost function causes the flatness of the sigmoid function near the ends to show up in the gradient terms and decreases the learning rate.  
+How do we solve this problem? It turns out that we can solve the problem by replacing the quadratic cost with a different cost function, known as the cross-entropy.  
+![image](https://user-images.githubusercontent.com/52414199/119226701-162bfe80-bb28-11eb-979d-59f34050106e.png)  
+Two properties in particular make it reasonable to interpret the cross-entropy as a cost function. First, it's non-negative, that is, C>0. Second, if the neuron's actual output is close to the desired output for all training inputs, x, then the cross-entropy will be close to zero. Here, the desired outputs are either 0 or 1. These are both properties we'd intuitively expect for a cost function.  
+But the cross-entropy cost function has the benefit that, unlike the quadratic cost, it avoids the problem of learning slowing down. Let us calculate the partial derivative to see this.  
+![image](https://user-images.githubusercontent.com/52414199/119227108-f7c70280-bb29-11eb-89f8-0bbb3971bd3d.png)  
+For the sigmoid function, σ′(z)=σ(z)(1−σ(z)). Therefore, the gradient becomes,  
+![image](https://user-images.githubusercontent.com/52414199/119227149-2e048200-bb2a-11eb-9f42-3cb68c7b044c.png)  
+The larger the error, the faster the neuron will learn. This is just what we'd intuitively expect. In particular, it avoids the learning slowdown caused by the σ′(z) term in the analogous equation for the quadratic cost.  
+
+Who cares how fast the neuron learns, when our choice of learning rate was arbitrary to begin with?! That objection misses the point. The point of the graphs isn't about the absolute speed of learning. It's about how the speed of learning changes. In particular, when we use the quadratic cost learning is slower when the neuron is unambiguously wrong than it is later on, as the neuron gets closer to the correct output; while with the cross-entropy learning is faster when the neuron is unambiguously wrong. Those statements don't depend on how the learning rate is set.  
+There is, incidentally, a very rough general heuristic for relating the learning rate for the cross-entropy and the quadratic cost. As we saw earlier, the gradient terms for the quadratic cost have an extra σ′=σ(1−σ) term in them. Suppose we average this over values for σ, ∫10dσσ(1−σ)=1/6. We see that (very roughly) the quadratic cost learns an average of 6 times slower, for the same learning rate. This suggests that a reasonable starting point is to divide the learning rate for the quadratic cost by 6.  
+
+When should we use the cross-entropy instead of the quadratic cost? In fact, the cross-entropy is nearly always the better choice, provided the output neurons are **sigmoid neurons**. By now, we've discussed the cross-entropy at great length. Why go to so much effort when it gives only a small improvement to our MNIST results? Part of the reason is that the cross-entropy is a widely-used cost function, and so is worth understanding well. But the more important reason is that neuron saturation is an important problem in neural nets, a problem we'll return to repeatedly throughout the book.
+
+#### Intuition behind cross-entropy
+what could have motivated us to think up the cross-entropy in the first place? Suppose we'd discovered the learning slowdown described earlier, and understood that the origin was the σ′(z) terms in Equations (55) and (56). After staring at those equations for a bit, we might wonder if it's possible to choose a cost function so that the σ′(z) term disappeared. We then integrate and try to find such a cost function. The cross-entropy isn't something that was miraculously pulled out of thin air. Rather, it's something that we could have discovered in a simple and natural way.  
+
+ However, it is worth mentioning that there is a standard way of interpreting the cross-entropy that comes from the field of information theory. Roughly speaking, the idea is that the cross-entropy is a measure of surprise. In particular, our neuron is trying to compute the function x→y=y(x). But instead it computes the function x→a=a(x). Suppose we think of a as our neuron's estimated probability that y is 1, and 1−a is the estimated probability that the right value for y is 0. Then the cross-entropy measures how "surprised" we are, on average, when we learn the true value for y. We get low surprise if the output is what we expect, and high surprise if the output is unexpected.  Wikipedia contains a [brief summary](http://en.wikipedia.org/wiki/Cross_entropy#Motivation) regarding this.
+ 
+### Softmax
+ The idea of softmax is to define a new type of output layer for our neural networks. It begins in the same way as with a sigmoid layer, by forming the weighted inputs.  However, we don't apply the sigmoid function to get the output. Instead, in a softmax layer we apply the so-called softmax function to the zLj. According to this function, the activation aLj of the jth output neuron is  
+ ![image](https://user-images.githubusercontent.com/52414199/119229167-3b266e80-bb34-11eb-8a6c-f270891ce532.png)  
+ The outputs are possitive and add up to 1. The fact that a softmax layer outputs a probability distribution is rather pleasing. In many problems it's convenient to be able to interpret the output activation aLj as the network's estimate of the probability that the correct output is j.  
+ To understand how softmax function solves the slow learning problem, let's define the log-likelihood cost function. We'll use x to denote a training input to the network, and y to denote the corresponding desired output. Then the log-likelihood cost associated to this training input is C≡−ln(a^L_y). Upon calculating the gradient and substituting the softmax function, we optain expressions similar those we've seen in the cross-entropy formulae. In fact, it's useful to think of a softmax output layer with log-likelihood cost as being quite similar to a sigmoid output layer with cross-entropy cost. As a more general point of principle, softmax plus log-likelihood is worth using whenever you want to interpret the output activations as probabilities.  
+ 
+### Overfitting and Regularization
+Models with a large number of free parameters can describe an amazingly wide range of phenomena. Even if such a model agrees well with the available data, that doesn't make it a good model. It may just mean there's enough freedom in the model that it can describe almost any data set of the given size, without capturing any genuine insights into the underlying phenomenon. When that happens the model will work well for the existing data, but will fail to generalize to new situations. The true test of a model is its ability to make predictions in situations it hasn't been exposed to before.  
+
+To explore this further, consider the MNIST neural network that we have considered before. Let us train it on only 1000 images. We see a smooth decrease in the value of the cost function and the accuract rises until a certain point. After this point, the accuracy on the _test_ data stays almost constant, ignoring stochastic fluctuations, whereas the cost function decreases smoothly. What do we understand from this phenomenon? If we just look at that cost, it appears that our model is still getting "better". But the test accuracy results show the improvement is an illusion. We say the network is __overfitting__ or __overtraining__ after that point.  
+Another sign of overfitting is the increasing value of cost function for the test data.  From a practical point of view, what we really care about is improving classification accuracy on the test data, while the cost on the test data is no more than a proxy for classification accuracy.  
+Another sign of overfitting may be seen in the classification accuracy on the training data. The accuracy rises all the way up to 100 percent. That is, our network correctly classifies all 1,000 training images! Meanwhile, our test accuracy tops out at just 82.27 percent. So our network really is learning about peculiarities of the training set, not just recognizing digits in general. It's almost as though our network is merely memorizing the training set, without understanding digits well enough to generalize to the test set.  
+
+Overfitting is a major problem in neural networks. This is especially true in modern networks, which often have very large numbers of weights and biases. To train effectively, we need a way of detecting when overfitting is going on, so we don't overtrain. And we'd like to have techniques for reducing the effects of overfitting.  
+The obvious way to detect overfitting is to use the approach above, keeping track of accuracy on the test data as our network trains. If we see that the accuracy on the test data is no longer improving, then we should stop training. Of course, strictly speaking, this is not necessarily a sign of overfitting. It might be that accuracy on the test data and the training data both stop improving at the same time. Still, adopting this strategy will prevent overfitting.  
+
+The MNIST dataset also has a subset called `validation_data`. Instead of using the `test_data` to prevent overfitting, we will use the `validation_data`. To do this, we'll use much the same strategy as was described above for the `test_data`. This strategy is called **early stopping**.  
+Why use the `validation_data` to prevent overfitting, rather than the `test_data`? In fact, this is part of a more general strategy, which is to use the `validation_data` to evaluate different trial choices of hyper-parameters such as the number of epochs to train for, the learning rate, the best network architecture, and so on. We use such evaluations to find and set good values for the hyper-parameters.  
+ If we set the hyper-parameters based on evaluations of the `test_data` it's possible we'll end up overfitting our hyper-parameters to the `test_data`. That is, we may end up finding hyper-parameters which fit particular peculiarities of the `test_data`, but where the performance of the network won't generalize to other data sets. We guard against that by figuring out the hyper-parameters using the `validation_data`. This approach to finding good hyper-parameters is sometimes known as the **hold out** method, since the `validation_data` is kept apart or "held out" from the `training_data`.  
+ 
+Isn't there a danger we'll end up overfitting to the test_data as well? Do we need a potentially infinite regress of data sets, so we can be confident our results will generalize? Addressing this concern fully is a deep and difficult problem. But for our practical purposes, we're not going to worry too much about this question.  
+
+In general, one of the best ways of reducing overfitting is to increase the size of the training data. With enough training data it is difficult for even a very large network to overfit. Unfortunately, training data can be expensive or difficult to acquire, so this is not always a practical option.
+
+### Regularization
+Are there other ways we can reduce the extent to which overfitting occurs? One possible approach is to reduce the size of our network. However, large networks have the potential to be more powerful than small networks, and so this is an option we'd only adopt reluctantly. Fortunately, there are other techniques which can reduce overfitting, even when we have a fixed network and fixed training data. These are known as _regularization_ techniques.  
+
+#### Weight decay or L2 regularization  
+The idea of L2 regularization is to add an extra term to the cost function, a term called the regularization term. Here's the regularized cross-entropy:  
+![image](https://user-images.githubusercontent.com/52414199/119230183-cc97df80-bb38-11eb-8d34-f4db3e70e402.png)  
+Here, λ is a _regularization parameter_. The regularization term doesn't include the biases. Intuitively, the effect of regularization is to make it so the network prefers to learn small weights, all other things being equal. Large weights will only be allowed if they considerably improve the first part of the cost function. The relative importance of the two elements of the compromise depends on the value of λ: when λ is small we prefer to minimize the original cost function, but when λ is large we prefer small weights.  
+
+How does this reduce over-fitting? Firstly, the gradients for the weights are similar to the previous ones, except that we have an additional (λw/n) term. Substituting this in the _learning rule_ we get,  
+![image](https://user-images.githubusercontent.com/52414199/119230417-b3dbf980-bb39-11eb-8fd6-96db2333e8f9.png)  
+This is the same as the gradient descent learning rule, but the weight is rescaled by a certain factor. This rescaling is sometimes referred to as **weight decay**, since it makes the weights smaller. At first glance it looks as though this means the weights are being driven unstoppably toward zero. But that's not right, since the other term may lead the weights to increase, if so doing causes a decrease in the unregularized cost function.  
+_Note_ `lambda` is a reserved word in Python.  
+
+The use of regularization has suppressed overfitting. What's more, the accuracy is considerably higher, with a peak classification accuracy of 87.1 percent, compared to the peak of 82.27 percent obtained in the unregularized case where we trained on 1000 images only. Indeed, we could almost certainly get considerably better results by continuing to train past 400 epochs. It seems that, empirically, regularization is causing our network to generalize better, and considerably reducing the effects of overfitting.  
+On applying regularization for the general case of training over 50000 images,  
+- The test data accuracy improves.
+- The gap between test and training data accuracy decreases.
+Also, unregularized runs will occasionally get "stuck", apparently caught in _local minima_ of the cost function (in case of non-convex cost functions). The result is that different runs sometimes provide quite different results. By contrast, the regularized runs have provided much more easily replicable results.  
+
+An intuition to explain the above: Heuristically, if the cost function is unregularized, then the length of the weight vector is likely to grow, all other things being equal. Over time this can lead to the weight vector being very large indeed. This can cause the weight vector to get stuck pointing in more or less the same direction, since changes due to gradient descent only make tiny changes to the direction, when the length is long.
+
+#### Why does regularization help reduce overfitting?
+A standard story people tell to explain what's going on is along the following lines: smaller weights are, in some sense, lower complexity, and so provide a simpler and more powerful explanation for the data, and should thus be preferred. To understand this better, consider the following example. Suppose we are trying to model y as a function of x, where y is somewhat linear in x. Let us try to model y as a polynomial in x. Once we've understood the polynomial case, we'll translate to neural networks. Now, there are ten points in the graph, which means we can find a unique 9th-order polynomial y=a0x9+a1x8+…+a9 which fits the data exactly. We can get a linear model which closely represents the data. Which model is better? Which may represent the real life scenarios in a better way?  
+One point of view is to say that in science we should go with the simpler explanation, unless compelled not to.  
+
+Suppose our network mostly has small weights, as will tend to happen in a regularized network. The smallness of the weights means that the behaviour of the network won't change too much if we change a few random inputs here and there. That makes it difficult for a regularized network to learn the effects of local noise in the data. Instead, a regularized network learns to respond to types of evidence which are seen often across the training set. By contrast, a network with large weights may change its behaviour quite a bit in response to small changes in the input. And so an unregularized network can use large weights to learn a complex model that carries a lot of information about the noise in the training data. In a nutshell, regularized networks are constrained to build relatively simple models based on patterns seen often in the training data, and are resistant to learning peculiarities of the noise in the training data. No-one has yet developed an entirely convincing theoretical explanation for why regularization helps networks generalize.
+
+A network with 100 hidden neurons has nearly 80,000 parameters. We have only 50,000 images in our training data. It's like trying to fit an 80,000th degree polynomial to 50,000 data points. By all rights, our network should overfit terribly. And yet, as we saw earlier, such a network actually does a pretty good job generalizing. Why is that the case? It's not well understood. It has been conjectured that "the dynamics of gradient descent learning in multilayer nets has a **self-regularization** effect". This is exceptionally fortunate, but it's also somewhat disquieting that we don't understand why it's the case.  
+
+Of course, it would be easy to modify the regularization procedure to regularize the biases. Empirically, doing this often doesn't change the results very much, so to some extent it's merely a convention whether to regularize the biases or not. However, it's worth noting that having a large bias doesn't make a neuron sensitive to its inputs in the same way as having large weights. And so we don't need to worry about large biases enabling our network to learn the noise in our training data.
