@@ -365,6 +365,10 @@ But the cross-entropy cost function has the benefit that, unlike the quadratic c
 For the sigmoid function, σ′(z)=σ(z)(1−σ(z)). Therefore, the gradient becomes,  
 ![image](https://user-images.githubusercontent.com/52414199/119227149-2e048200-bb2a-11eb-9f42-3cb68c7b044c.png)  
 The larger the error, the faster the neuron will learn. This is just what we'd intuitively expect. In particular, it avoids the learning slowdown caused by the σ′(z) term in the analogous equation for the quadratic cost.  
+_Note._ The above works because _BP1_ has the gradient of C multiplied with σ′(z). Therefore, we could come with an intuitive cost function to cancel the σ′(z) part. This is not so easy for the hidden layers where _BP2_ comes in.  
+![image](https://user-images.githubusercontent.com/52414199/119362828-c20d4f80-bcca-11eb-97b0-d3534dbca371.png)  
+We can extend the cross-entropy cost function to multiple neurons in the output layer. Here, _j_ is for the neurons in the output layer and _x_ is for the inputs to output layer neurons.
+![image](https://user-images.githubusercontent.com/52414199/119361573-70b09080-bcc9-11eb-85da-aa3c14c6c012.png)  
 
 Who cares how fast the neuron learns, when our choice of learning rate was arbitrary to begin with?! That objection misses the point. The point of the graphs isn't about the absolute speed of learning. It's about how the speed of learning changes. In particular, when we use the quadratic cost learning is slower when the neuron is unambiguously wrong than it is later on, as the neuron gets closer to the correct output; while with the cross-entropy learning is faster when the neuron is unambiguously wrong. Those statements don't depend on how the learning rate is set.  
 There is, incidentally, a very rough general heuristic for relating the learning rate for the cross-entropy and the quadratic cost. As we saw earlier, the gradient terms for the quadratic cost have an extra σ′=σ(1−σ) term in them. Suppose we average this over values for σ, ∫10dσσ(1−σ)=1/6. We see that (very roughly) the quadratic cost learns an average of 6 times slower, for the same learning rate. This suggests that a reasonable starting point is to divide the learning rate for the quadratic cost by 6.  
@@ -460,5 +464,52 @@ Of course, it would be easy to modify the regularization procedure to regularize
  The message to take away, especially in practical applications, is that what we want is both better algorithms and better training data. It's fine to look for better algorithms, but make sure you're not focusing on better algorithms to the exclusion of easy wins getting more or better training data.  
  
 ### Weight Initialization
+Up until now, we selected the initial weights and baises from a normal Gaussian. Consider a netowrk with, say, a million input neurons. The value of _z_ in the next layer will tend to be very large. This is because the sum of many Gaussian distributions tends to be flat. Therefore, the output neuron is almost always saturated. We've seen that learning is slow near saturation.  
+You must be wondering that we solved the slow learning problem near saturation already using cross-entropy and log-likelihood cost functions. These solved the problem only in the _output_ layer. However, these methods do not help the hidden layer neurons.
 
+Suppose we have a neuron with nin input weights. Then we shall initialize those weights as Gaussian random variables with mean 0 and standard deviation 1/sqrt(n<sub>in</sub>). That is, we'll squash the Gaussians down, making it less likely that our neuron will saturate. We'll continue to choose the bias as a Gaussian with mean 0 and standard deviation 1. This is because changing bias does not affect the learning rate much. As we have corrected the saturation part through the weights, bias does not make much of a difference.  
+It is important to keep in mind that this technique does not improve the accuracy of the network in the examples we've seen. It only improves the learning rate. However, this method does improve the performance slightly in deep neural networks as we shall see later.  
 
+### A side-note about implementation of the above techniques
+ - We implement cost function as a class as we need both its value and the expression for its gradient (for backpropagation). Instead of defining two separate functions, it is easier to implement a class in python.
+ - It occurs surprisingly often that sophisticated techniques can be implemented with small changes to code.
+
+### Choosing hyperparameters
+How do we interpret the results of the accuracy in each run to regulate the hyperparameters. If the accuracy behaves randomly, many scenarios are possible. It might mean that our network does not have enough neurons. It could mean our network does not have enough layers. The mini-batches are too small. There are lots of parameters to consider while building large networks. However, we will discuss a broad strategy to come up with good hyperparameters for a given neural network.  
+1. We can try to reduce the number of outputs and thereby effectively reducing the training data to observe the accuracies. For example, in the digit recognition network, we may opt images of 0's and 1's only and discard the remaining 8 digits in this process. This improves training speed, which means we can experiment and come up with good ideas rapidly.
+2. We can reduce the network to a simple network for experimentation. For example, we can do away with the hidden layers and build back up to them later. This also improves the training speed.
+3. Monitor the performance of the network more frequently to get more insights. We can also reduce the training data set, or rather use the `validation_data` to find the optimal hyperparameters.  
+
+Inspite of the above methods, the data might still look like noise. However, as the feedback is given more frequently, we can experiment faster.  
+**Note** You should adjust the value of λ when the size of training data changes. This ensures the weight decay remains the same (in case of *L2* regularization).  
+
+After the above simplifications to our network, we make changes to the hyperparameters and observe if that improves the feedback. We add hidden layers and experiment with more values to reach the optimal values. We can choose a good value for hyperparameters based on the following discussion.
+#### Learning Rate η
+If η is too large then the steps will be so large that they may actually overshoot the minimum, causing the algorithm to climb up out of the valley instead. If η is too small then the learning will be very slow.  
+Therefore, we estimate the threshold value for η at which the cost on the training data immediately begins decreasing, instead of oscillating or increasing. That is, you need to calculate the maximum η for which the value of the cost function decreases.   
+Obviously, the actual value of η that you use should be no larger than the threshold value. In fact, if the value of η is to remain usable over many epochs then you likely want to use a value for η that is smaller, say, a factor of two below the threshold. Such a choice will typically allow you to train for many epochs, without causing too much of a slowdown in learning.
+We stated earlier that hyperparameters are picked by evaluating performance using our held-out validation data. In fact, we'll use validation accuracy to pick the regularization hyper-parameter, the mini-batch size, and network parameters such as the number of layers and hidden neurons, and so on. Although, as a special case for the learning rate, we use the network's performance on the training data.  
+The reasoning is that the other hyper-parameters are intended to improve the final classification accuracy on the test set, and so it makes sense to select them on the basis of validation accuracy. However, the learning rate is only incidentally meant to impact the final classification accuracy. Its primary purpose is really to control the step size in gradient descent, and monitoring the training cost is the best way to detect if the step size is too big.  
+
+#### Number of training epochs
+Until now we stopped training when the classificiation accuracy does not substantially improve across two consecutive epochs. This method is called _early stopping_. We need not worry about choosing the number of epochs in this method and it also prevents overfitting. So how do we know when the classification accuracy is not changing substantially? We have seen that it changes frequently as is often accompanied with random fluctuations.  
+We may choose to stop the training if the "best" seen accuracy does not change for, say, 10 epochs. This seems to work for the MNIST example, but some networks tend to plateau near a particular classification accuracy sometimes. Therefore the 'no-improvement-in-ten' rule may be aggressive for some networks.  
+
+#### Learning Rate Schedule
+This is different from the learning rate η we've spoken about. Instead of keeping a static η, we may choose to change η dynamically to not over-step the minima. The idea is to hold the learning rate constant until the validation accuracy starts to get worse. Then decrease the learning rate by some amount, say a factor of two or ten. We repeat this many times, until, say, the learning rate is a factor of 1,024 (or 1,000) times lower than the initial value. Then we terminate.  
+
+#### The Regularization Parameter λ
+Before determining this parameter, ensure that you have the optimal η. That is, λ = 0. After that, tune it exponentially and then fine-tune the parameter after obtaining the correct order of magnitude.  
+
+#### Mini-batch size
+Suppose we start out with mini-batches of size 1. This method is called **online learning**. The cost function of the individual input may be significantly different from the overall cost function. However, if we have considerable number of inputs, we may end up getting a good enough value for the cost function. Essentially, this is like calculating the Gradient for each of the inputs separately. Although, we know that matrix and vector computation methods can calculate the gradient of, say, a 100 inputs simultaneously in a _much_(usually) shorter period of time. We can't choose the entire data because that's slow. Fortunately, the choice of mini-batch size at which the speed is maximized is relatively independent of the other hyper-parameters.  
+
+The way to go is therefore to use some acceptable (but not necessarily optimal) values for the other hyper-parameters, and then trial a number of different mini-batch sizes, scaling η as above. Plot the validation accuracy versus time (as in, real elapsed time, not epoch!), and choose whichever mini-batch size gives you the most rapid improvement in performance. With the mini-batch size chosen you can then proceed to optimize the other hyper-parameters.  
+
+#### Automated Techniques
+A great deal of work has been done on automating the process of choosing the optimal values for various hyperparameters. A common technique is **grid search**, which systematically searches through a grid in hyper-parameter space.  
+
+In practice, there are relationships between the hyper-parameters. You may experiment with η, feel that you've got it just right, then start to optimize for λ, only to find that it's messing up your optimization for η. In practice, it helps to bounce backward and forward, gradually closing in good values.  
+
+### Variations on Stochastic Gradient Descent
+#### Hessian Technique  
