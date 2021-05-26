@@ -513,3 +513,12 @@ In practice, there are relationships between the hyper-parameters. You may exper
 
 ### Variations on Stochastic Gradient Descent
 #### Hessian Technique  
+![image](https://user-images.githubusercontent.com/52414199/119629286-7f16bd80-be2b-11eb-8c12-9599077813fb.png)  
+In the Gradient Descent method, we only considered the first derivative. Here, we consider 2nd order terms and this approach of minimizing the cost function is called as **Hessian Technique** or **Hessian Optimization**. This method converges to a minima faster than the original method. We can modify the Back Propagation algorithm to calculate the Hessian. Although, this approach is infeasible when large number of neurons are involved. The matrix size becomes large and it is difficult to perform computations on this matrix (Calculating inverse in *O*(n<sup>3</sup>) ).
+
+#### Momentum based gradient Descent  
+This approach introduces the concept of _velocity_ of the parameters we are trying to optimize. Formally, we replace the w→w′=w−η∇C by  
+![image](https://user-images.githubusercontent.com/52414199/119630175-5216da80-be2c-11eb-863f-767e1df87207.png) 
+In these equations, μ is a hyper-parameter which controls the amount of damping or friction in the system.
+
+I'm skipping Chapter 3 conclusion, Chapter 4 and Chapter 5 here.
