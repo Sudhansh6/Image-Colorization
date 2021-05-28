@@ -35,7 +35,7 @@ Another way perceptrons can be used is to compute the elementary logical functio
 
 ### Sigmoid Neurons
 A small change in the weights or bias of any single perceptron in the network can sometimes cause the output of that perceptron to completely flip, say from $0$ to $1$. We can overcome this problem by introducing a new type of artificial neuron called a sigmoid neuron. Sigmoid neurons are similar to perceptrons, but modified so that small changes in their weights and bias cause only a small change in their output. That's the crucial fact which will allow a network of sigmoid neurons to learn.  
-Just like a perceptron, the sigmoid neuron has inputs, $x1,x2,….$ But instead of being just 0 or 1, these inputs can also take on any values between $0$ and $1$. So, for instance, $0.638…$ is a valid input for a sigmoid neuron. Also just like a perceptron, the sigmoid neuron has weights for each input, $w1,w2,…,$ and an overall bias, $b$. But the output is not $0$ or $1$. Instead, it's $σ(w⋅x+b)$, where $σ$ is called the sigmoid function.  
+Just like a perceptron, the sigmoid neuron has inputs, $x_1,x_2,….$ But instead of being just 0 or 1, these inputs can also take on any values between $0$ and $1$. So, for instance, $0.638…$ is a valid input for a sigmoid neuron. Also just like a perceptron, the sigmoid neuron has weights for each input, $w_1,w_2,…,$ and an overall bias, $b$. But the output is not $0$ or $1$. Instead, it's $σ(w⋅x+b)$, where $σ$ is called the sigmoid function.  
 To understand the similarity to the perceptron model, suppose $z≡w⋅x+b$ is a large positive number. Then $e−z≈0$ and so $σ(z)≈1$. In other words, when $z=w⋅x+b$ is large and positive, the output from the sigmoid neuron is approximately $1$, just as it would have been for a perceptron. Suppose on the other hand that $z=w⋅x+b$ is very negative. Then $e−z→∞$, and $σ(z)≈0$. So when $z=w⋅x+b$ is very negative, the behaviour of a sigmoid neuron also closely approximates a perceptron.  
 
 ### Neural Networks Architecture
@@ -50,7 +50,7 @@ Here, $\eta$ refers to the **learning rate** and is one of the _hyperparameters_
 
 In the above algorithm, we calculated the cost function for all the inputs in each iteration. This turns out to be a computationally expensive step. Therefore, we select a **mini-batch** from the input and evaluate the cost function over this input. We assume that this cost function is a representative of the real cost function. We change the mini-batch in each iteration so as to cover all the inputs. The change in the cost function looks like this:  
 ![image](https://user-images.githubusercontent.com/52414199/118255671-2b6eb080-b4ca-11eb-9bde-5bf813c25d1d.png)  
-*Note* The above cost function is taken as an average to maintina consistency in the mini-batches method.
+*Note* The above cost function is taken as an average to maintain consistency in the mini-batches method.
 
 In summary, we take a random set of weights and biases and perform gradient descent on a subset of inputs to obtain the optimal set of parameters. This method is called as **Stochastic Gradient Descent**. (Stochastic refers to the random initial start and random mini-batches).
 
@@ -106,7 +106,7 @@ def SGD(self, training_data, epochs, mini_batch_size, eta,
                 print "Epoch {0} complete".format(j)
 ```
 
-  **The Back Propagation Algorithm** 
+  **The Back Propagation Algorithm**  
   ```python
   def backprop(self, x, y):
         """Return a tuple ``(nabla_b, nabla_w)`` representing the
@@ -143,6 +143,8 @@ def SGD(self, training_data, epochs, mini_batch_size, eta,
             nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
         return (nabla_b, nabla_w)
   ```
+--
+
 *Note* Back Propagation was not discussed until here. It will be discussed in the next chapter.
 
 ### Observations
@@ -156,7 +158,7 @@ A deep neural network is able to learn complex data due to its hierarchical stru
 
 All the above equations in the network are written in terms of summations. We can easily replace them using matrix representation. This allows faster calculations and does away with index representation. In our notation, we shall use $$w^l_{jk}$$ to denote the weight for the connection from the $$k$$th neuron in the $(l−1)$th layer to the $j$th neuron in the $l$th layer.
 
-![image-20210519162827182](/home/sudhansh/Misc Projects/SoC - Image Colorization/README.assets/image-20210519162827182.png)
+![image-20210519162827182](README_md.assets/image-20210519162827182.png)
 
 *Note.* The notation is reverse from what is expected.
 
@@ -175,35 +177,35 @@ The Hadamard/Schur product is defined as $(s \bigodot t)_j = s_j * t_j$.
 
 Let us get familiar with some notation before moving forward. We define $\delta^l_j$ of neuron $j$ in layer $l$ by, 
 
-![image-20210519164628397](/home/sudhansh/Misc Projects/SoC - Image Colorization/README.assets/image-20210519164628397.png)
+![image-20210519164628397](README_md.assets/image-20210519164628397.png)
 
 It represents the change in the cost function when $z^l_j$ is changed. The equations are as follows:
 
-1. ![image-20210519164817114](/home/sudhansh/Misc Projects/SoC - Image Colorization/README.assets/image-20210519164817114.png)
+1. ![image-20210519164817114](README_md.assets/image-20210519164817114.png)
 
    Notice that $BP1$ can be easily calculated if we know the partial derivative in the above equation. It can be rewritten in the matrix form as, $\delta^L = \nabla_aC \bigodot \sigma' (z^L)$. The above equation only talks about the output and change in the output layer!
 
-2. ![image-20210519165158598](/home/sudhansh/Misc Projects/SoC - Image Colorization/README.assets/image-20210519165158598.png)
+2. ![image-20210519165158598](README_md.assets/image-20210519165158598.png)
 
    It represents the change in $z^{l+1}$ with respect to a change in $z^l$. By combining $BP2$ with $BP1$ we can compute the error $\delta^l$ for any layer in the network.  We start by using $BP1$ to compute , then$\delta^l$ apply Equation $BP2$ to compute $\delta^{l-1}$, then Equation $BP2$ again to compute $\delta^{l-1}$, and so on, all the way back through the network.
 
-3. ![image-20210519165613369](/home/sudhansh/Misc Projects/SoC - Image Colorization/README.assets/image-20210519165613369.png)
+3. ![image-20210519165613369](README_md.assets/image-20210519165613369.png)
 
    Until now, the equations were written in terms of the output at each neuron. The above equation holds due to the definition of $\delta^l_j$.
 
-4. ![image-20210519165853795](/home/sudhansh/Misc Projects/SoC - Image Colorization/README.assets/image-20210519165853795.png)
+4. ![image-20210519165853795](README_md.assets/image-20210519165853795.png)
 
    This equation is similar to the previous one. Each $w^l_{jk}$ is associated with the output from the previous layer which brings $a_k^{l-1}$ into the picture. $a_k^{l-1}$ is the output from the previous layer.
 
 #### Conclusions from the above Equations
 
-- When the activation $a$in is small, $a$in≈0, the gradient term ∂*C*/∂*w* will also tend to be small. 
-- A weight in the final layer will learn slowly if the output neuron is either low activation (≈0) or high activation (≈1). In this case it's common to say the output neuron has *saturated* and, as a result, the weight has stopped learning (or is learning slowly).  Similar remarks hold also for the biases of output neuron. We can obtain similar insights for earlier layers. And this, in turn, means that any weights input to a saturated neuron will learn slowly (if the number of inputs is small).
+- When the activation $a$in is small, $a_{in}$≈0, the gradient term ∂*C*/∂*w* will also tend to be small. 
+- A weight in the final layer will learn slowly if the output neuron is either low activation $(≈0)$ or high activation $(≈1)$. In this case it's common to say the output neuron has *saturated* and, as a result, the weight has stopped learning (or is learning slowly).  Similar remarks hold also for the biases of output neuron. We can obtain similar insights for earlier layers. And this, in turn, means that any weights input to a saturated neuron will learn slowly (if the number of inputs is small).
 -  The four fundamental equations turn out to hold for any activation function, not just the standard sigmoid function.
 
 The equations are summarised as:
 
-![image-20210519170510043](/home/sudhansh/Misc Projects/SoC - Image Colorization/README.assets/image-20210519170510043.png)
+![image-20210519170510043](README_md.assets/image-20210519170510043.png)
 
 
 

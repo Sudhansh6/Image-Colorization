@@ -64,11 +64,12 @@ type of artificial neuron called a sigmoid neuron. Sigmoid neurons are
 similar to perceptrons, but modified so that small changes in their
 weights and bias cause only a small change in their output. That’s the
 crucial fact which will allow a network of sigmoid neurons to learn.  
-Just like a perceptron, the sigmoid neuron has inputs, *x*1, *x*2, ….
-But instead of being just 0 or 1, these inputs can also take on any
-values between 0 and 1. So, for instance, 0.638… is a valid input for a
-sigmoid neuron. Also just like a perceptron, the sigmoid neuron has
-weights for each input, *w*1, *w*2, …, and an overall bias, *b*. But the
+Just like a perceptron, the sigmoid neuron has inputs,
+*x*<sub>1</sub>, *x*<sub>2</sub>, …. But instead of being just 0 or 1,
+these inputs can also take on any values between 0 and 1. So, for
+instance, 0.638… is a valid input for a sigmoid neuron. Also just like a
+perceptron, the sigmoid neuron has weights for each input,
+*w*<sub>1</sub>, *w*<sub>2</sub>, …, and an overall bias, *b*. But the
 output is not 0 or 1. Instead, it’s *σ*(*w*⋅*x*+*b*), where *σ* is
 called the sigmoid function.  
 To understand the similarity to the perceptron model, suppose
@@ -124,7 +125,7 @@ function is a representative of the real cost function. We change the
 mini-batch in each iteration so as to cover all the inputs. The change
 in the cost function looks like this:  
 ![image](https://user-images.githubusercontent.com/52414199/118255671-2b6eb080-b4ca-11eb-9bde-5bf813c25d1d.png)  
-*Note* The above cost function is taken as an average to maintina
+*Note* The above cost function is taken as an average to maintain
 consistency in the mini-batches method.
 
 In summary, we take a random set of weights and biases and perform
@@ -188,8 +189,10 @@ def SGD(self, training_data, epochs, mini_batch_size, eta,
                 print "Epoch {0} complete".format(j)
 ```
 
-**The Back Propagation Algorithm**
+**The Back Propagation Algorithm**  
 ``` python   def backprop(self, x, y):         """Return a tuple ``(nabla_b, nabla_w)`` representing the         gradient for the cost function C_x.  ``nabla_b`` and         ``nabla_w`` are layer-by-layer lists of numpy arrays, similar         to ``self.biases`` and ``self.weights``."""         nabla_b = [np.zeros(b.shape) for b in self.biases]         nabla_w = [np.zeros(w.shape) for w in self.weights]         # feedforward         activation = x         activations = [x] # list to store all the activations, layer by layer         zs = [] # list to store all the z vectors, layer by layer         for b, w in zip(self.biases, self.weights):             z = np.dot(w, activation)+b             zs.append(z)             activation = sigmoid(z)             activations.append(activation)         # backward pass         delta = self.cost_derivative(activations[-1], y) * \             sigmoid_prime(zs[-1])         nabla_b[-1] = delta         nabla_w[-1] = np.dot(delta, activations[-2].transpose())         # Note that the variable l in the loop below is used a little         # differently to the notation in Chapter 2 of the book.  Here,         # l = 1 means the last layer of neurons, l = 2 is the         # second-last layer, and so on.  It's a renumbering of the         # scheme in the book, used here to take advantage of the fact         # that Python can use negative indices in lists.         for l in xrange(2, self.num_layers):             z = zs[-l]             sp = sigmoid_prime(z)             delta = np.dot(self.weights[-l+1].transpose(), delta) * sp             nabla_b[-l] = delta             nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())         return (nabla_b, nabla_w) ```
+–
+
 *Note* Back Propagation was not discussed until here. It will be
 discussed in the next chapter.
 
@@ -220,7 +223,7 @@ to denote the weight for the connection from the
 *k*
 th neuron in the (*l*−1)th layer to the *j*th neuron in the *l*th layer.
 
-![image-20210519162827182](/home/sudhansh/Misc%20Projects/SoC%20-%20Image%20Colorization/README.assets/image-20210519162827182.png)
+![image-20210519162827182](README_md.assets/image-20210519162827182.png)
 
 *Note.* The notation is reverse from what is expected.
 
@@ -249,13 +252,13 @@ The Hadamard/Schur product is defined as
 Let us get familiar with some notation before moving forward. We define
 *δ*<sub>*j*</sub><sup>*l*</sup> of neuron *j* in layer *l* by,
 
-![image-20210519164628397](/home/sudhansh/Misc%20Projects/SoC%20-%20Image%20Colorization/README.assets/image-20210519164628397.png)
+![image-20210519164628397](README_md.assets/image-20210519164628397.png)
 
 It represents the change in the cost function when
 *z*<sub>*j*</sub><sup>*l*</sup> is changed. The equations are as
 follows:
 
-1.  ![image-20210519164817114](/home/sudhansh/Misc%20Projects/SoC%20-%20Image%20Colorization/README.assets/image-20210519164817114.png)
+1.  ![image-20210519164817114](README_md.assets/image-20210519164817114.png)
 
     Notice that *B**P*1 can be easily calculated if we know the partial
     derivative in the above equation. It can be rewritten in the matrix
@@ -264,7 +267,7 @@ follows:
     above equation only talks about the output and change in the output
     layer!
 
-2.  ![image-20210519165158598](/home/sudhansh/Misc%20Projects/SoC%20-%20Image%20Colorization/README.assets/image-20210519165158598.png)
+2.  ![image-20210519165158598](README_md.assets/image-20210519165158598.png)
 
     It represents the change in *z*<sup>*l* + 1</sup> with respect to a
     change in *z*<sup>*l*</sup>. By combining *B**P*2 with *B**P*1 we
@@ -275,13 +278,13 @@ follows:
     *δ*<sup>*l* − 1</sup>, and so on, all the way back through the
     network.
 
-3.  ![image-20210519165613369](/home/sudhansh/Misc%20Projects/SoC%20-%20Image%20Colorization/README.assets/image-20210519165613369.png)
+3.  ![image-20210519165613369](README_md.assets/image-20210519165613369.png)
 
     Until now, the equations were written in terms of the output at each
     neuron. The above equation holds due to the definition of
     *δ*<sub>*j*</sub><sup>*l*</sup>.
 
-4.  ![image-20210519165853795](/home/sudhansh/Misc%20Projects/SoC%20-%20Image%20Colorization/README.assets/image-20210519165853795.png)
+4.  ![image-20210519165853795](README_md.assets/image-20210519165853795.png)
 
     This equation is similar to the previous one. Each
     *w*<sub>*j**k*</sub><sup>*l*</sup> is associated with the output
@@ -292,8 +295,8 @@ follows:
 
 #### Conclusions from the above Equations
 
--   When the activation *a*in is small, *a*in≈0, the gradient term
-    ∂*C*/∂*w* will also tend to be small.
+-   When the activation *a*in is small, *a*<sub>*i**n*</sub>≈0, the
+    gradient term ∂*C*/∂*w* will also tend to be small.
 -   A weight in the final layer will learn slowly if the output neuron
     is either low activation (≈0) or high activation (≈1). In this case
     it’s common to say the output neuron has *saturated* and, as a
@@ -307,4 +310,4 @@ follows:
 
 The equations are summarised as:
 
-![image-20210519170510043](/home/sudhansh/Misc%20Projects/SoC%20-%20Image%20Colorization/README.assets/image-20210519170510043.png)
+![image-20210519170510043](README_md.assets/image-20210519170510043.png)
