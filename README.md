@@ -523,6 +523,7 @@ In these equations, μ is a hyper-parameter which controls the amount of damping
 
 I'm skipping Chapter 3 conclusion, Chapter 4 and Chapter 5 here.
 
+
 ## Convolution Neural Networks
 
 Take a look a this [playlist](https://www.youtube.com/watch?v=cFgASecJGo8&list=PLyqSpQzTE6M-SISTunGRBRiZk7opYBf_K&index=50) for detailed information.  
