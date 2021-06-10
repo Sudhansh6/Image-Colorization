@@ -537,4 +537,38 @@ CNN's are special types of artificial neural networks which expect images as inp
 
 Applications in Image Recognition, Object Detection and Medical Image Analysis. 
 
-Dilated convolution is similar to Average Pooling + Naive Convolution?
+Dilated convolution is similar to Average Pooling + Naive Convolution?  
+
+## ResNet
+
+The error% for 56-layer is more than a 20-layer network in both cases of training data as well as testing data. This suggests that with adding more layers on top of a network, its performance degrades. This could be blamed on the optimization function, initialization of the network and more importantly vanishing gradient problem. This problem of training very deep networks has been alleviated with the introduction of ResNet or residual networks and these Resnets are made up from Residual Blocks.
+
+![image-20210609142041509](README_md.assets/image-20210609142041509.png)
+
+The very first thing we notice to be different is that there is a direct connection which skips some layers(may vary in different models) in between. This connection is called ’skip connection’ and is the core of residual blocks. Due to this skip connection, the output of the layer is not the same now. Without using this skip connection, the input ‘x’ gets multiplied by the weights of the layer followed by adding a bias term.
+
+Next, this term goes through the activation function, f() and we get our output as H(x).
+
+```
+H(x) = f(wx + b) 
+or H(x) = f(x)
+```
+
+Now with the introduction of skip connection, the output is changed to
+
+```
+ H(x)=f(x)+x
+```
+
+There appears to be a slight problem with this approach when the dimensions of the input vary from that of the output which can happen with convolutional and pooling layers. In this case, when dimensions of f(x) are different from x, we can take two approaches:
+
+The skip connection is padded with extra zero entries to increase its dimensions.
+The projection method is used to match the dimension which is done by adding 1×1 convolutional layers to input. In such a case, the output is:
+
+```
+H(x)=f(x)+w1.x
+```
+
+Here we add an additional parameter w1 whereas no additional parameter is added when using the first approach. 
+
+The skip connections in ResNet solve the problem of vanishing gradient  in deep neural networks by allowing this alternate shortcut path for the gradient to flow through. The other way that these connections help is  by allowing the model to learn the identity functions which ensures that the higher layer will perform at least as good as the lower layer, and  not worse.

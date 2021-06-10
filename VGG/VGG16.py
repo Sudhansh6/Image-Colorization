@@ -7,7 +7,9 @@ from torchvision.transforms import ToTensor, Compose, Resize
 import matplotlib.pyplot as plt
 
 torch.cuda.empty_cache()
-transforms = Compose([Resize((64,64)),ToTensor()])
+
+img_size = 64
+transforms = Compose([Resize((img_size, img_size)),ToTensor()])
 training_data = datasets.MNIST(
 	root="data",
 	train=True,
@@ -22,17 +24,11 @@ test_data = datasets.MNIST(
 	transform=transforms
 )
 
-rnd = 42
-learning_rate = 0.1
-batch_size = 60
-epochs = 15
-
-img_size = 64
+rnd = 420
+learning_rate = 0.05
+batch_size = 64
+epochs = 7
 classes = 10
-
-# subset = list(range(0, len(training_data), 100))
-# training_data = Subset(training_data, subset)
-# test_data = Subset(test_data, subset)
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print('Using {} device'.format(device))
@@ -41,54 +37,60 @@ class NeuralNetwork(nn.Module):
   def __init__(self):
     super(NeuralNetwork, self).__init__()
     self.features = nn.Sequential(
-					nn.Conv2d(1, 64, kernel_size=3),
+          # o = (i - k + 2*p)/s + 1
+          # o = (i - p + 2*p)/s + 1
+					nn.Conv2d(1, 64, kernel_size=3, padding=1), # 224 + 2 - 3 + 1 = 224/64
 					nn.ReLU(inplace=True),
-					nn.Conv2d(64, 64, kernel_size=3),
+					nn.Conv2d(64, 64, kernel_size=3, padding=1), # 224  + 2 - 3 + 1 = 224
 					nn.ReLU(inplace=True),
-					nn.MaxPool2d(kernel_size=2, stride=2),
+					nn.MaxPool2d(kernel_size=2, stride=2), # (224 - 2)/2 + 1 = 112/32
 
-					nn.Conv2d(64, 128, kernel_size=3),
+					nn.Conv2d(64, 128, kernel_size=3, padding=1), # 112
 					nn.ReLU(inplace=True),
-					nn.Conv2d(128, 128, kernel_size=3),
+					nn.Conv2d(128, 128, kernel_size=3, padding=1), # 112
 					nn.ReLU(inplace=True),
-					nn.MaxPool2d(kernel_size=2, stride=2),
+					nn.MaxPool2d(kernel_size=2, stride=2), # 56/16
 
-					nn.Conv2d(128, 256, kernel_size=3),
-					nn.ReLU(inplace=True),
-					nn.Conv2d(256, 256, kernel_size=3),
-					nn.ReLU(inplace=True),
-					nn.Conv2d(256, 256, kernel_size=3),
-					nn.ReLU(inplace=True),
-					nn.MaxPool2d(kernel_size=2, stride=2),
+					# nn.Conv2d(128, 256, kernel_size=3, padding=1), # 56
+					# nn.ReLU(inplace=True),
+					# nn.Conv2d(256, 256, kernel_size=3, padding=1), # 56
+					# nn.ReLU(inplace=True),
+					# nn.Conv2d(256, 256, kernel_size=3, padding=1), # 56
+					# nn.ReLU(inplace=True),
+					# nn.MaxPool2d(kernel_size=2, stride=2), # 28/8
 
-					nn.Conv2d(256, 512, kernel_size=3),
-					nn.ReLU(inplace=True),
-					nn.Conv2d(512, 512, kernel_size=3),
-					nn.ReLU(inplace=True),
-					nn.Conv2d(512, 512, kernel_size=3),
-					nn.ReLU(inplace=True),
-					nn.MaxPool2d(kernel_size=2, stride=2),
+					# nn.Conv2d(256, 512, kernel_size=3, padding=1), 
+					# nn.ReLU(inplace=True),
+					# nn.Conv2d(512, 512, kernel_size=3, padding=1),
+					# nn.ReLU(inplace=True),
+					# nn.Conv2d(512, 512, kernel_size=3, padding=1),
+					# nn.ReLU(inplace=True),
+					# nn.MaxPool2d(kernel_size=2, stride=2), # 14/4
 
-					nn.Conv2d(256, 512, kernel_size=3),
-					nn.ReLU(inplace=True),
-					nn.Conv2d(512, 512, kernel_size=3),
-					nn.ReLU(inplace=True),
-					nn.Conv2d(512, 512, kernel_size=3),
-					nn.ReLU(inplace=True),
-					nn.MaxPool2d(kernel_size=2, stride=2)
-			)
-
+					# nn.Conv2d(512, 512, kernel_size=3, padding=1),
+					# nn.ReLU(inplace=True),
+					# nn.Conv2d(512, 512, kernel_size=3, padding=1),
+					# nn.ReLU(inplace=True),
+					# nn.Conv2d(512, 512, kernel_size=3, padding=1),
+					# nn.ReLU(inplace=True),
+					# nn.MaxPool2d(kernel_size=2, stride=2) # 7/2
+    )
+    self.avgpool = nn.AdaptiveAvgPool2d(output_size = (7, 7))
     self.classifier = nn.Sequential(
-					nn.Linear(256 * 6 * 6, 4096),
+					nn.Linear(49*128, 4096),
 					nn.ReLU(inplace=True),
-					nn.Linear(4096, 4096),
-					nn.ReLU(inplace=True),
-					nn.Linear(4096, 10),
-					nn.SoftMax()
+					nn.Dropout(p = 0.5),
+					# nn.Linear(4096, 4096),
+					# nn.ReLU(inplace=True),
+					# nn.Dropout(p = 0.5),
+          nn.Linear(4096, 10),
+          nn.Softmax()
 			)
   def forward(self, x: torch.Tensor) -> torch.Tensor:
     x = self.features(x)
+    x = self.avgpool(x)
     x = torch.flatten(x, 1)
+    # print(x.size())
     x = self.classifier(x)
     return x
 
