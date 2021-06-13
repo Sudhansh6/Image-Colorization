@@ -572,3 +572,91 @@ H(x)=f(x)+w1.x
 Here we add an additional parameter w1 whereas no additional parameter is added when using the first approach. 
 
 The skip connections in ResNet solve the problem of vanishing gradient  in deep neural networks by allowing this alternate shortcut path for the gradient to flow through. The other way that these connections help is  by allowing the model to learn the identity functions which ensures that the higher layer will perform at least as good as the lower layer, and  not worse.
+
+
+
+## Generative Adversarial Networks (GANs)
+
+I used [this](https://towardsdatascience.com/understanding-generative-adversarial-networks-gans-cd6e4651a29) blog to learn about GANs. They were introduced by Ian J. Goodfellow in 2014 in the article [Generative Adversarial Nets](https://arxiv.org/abs/1406.2661).  Generative Adversarial Networks belong to the set of generative models. It means that they are able to produce / to generate new content.
+
+### Generating Random Variables
+
+The aim of this section is to introduce methods that can generate random numbers from a given probability distribution. Firstly, we need to note the fact that **Uniform random variables can be pseudo-randomly generated**. As computers are deterministic, it is theoretically impossible to generate "truly" random numbers. However, we can come up with methods that are close.  
+
+We can generate an approximate uniform distribution between 0 and 1. This distribution can be further used to generate more complex random variables. There are different methods which we can use like inverse transformation, rejection sampling, Metropolis-Hasting algorithm and others. *Take a look a the Cambridge book to learn more about these methods* 
+
+**Rejection Sampling** expresses the random variable as the result of a process that consist in sampling not from the complex distribution but from a well known simple distribution and to accept or reject the sampled value depending on  some condition. expresses the random variable as the result of a process that consist in sampling not from the complex distribution but from a well known simple distribution and to accept or reject the sampled value depending on  some condition. In mathematical terms, 
+
+![image-20210613220522601](README_md.assets/image-20210613220522601.png)
+
+In the [Metropolis-Hasting algorithm](https://en.wikipedia.org/wiki/Metropolis–Hastings_algorithm), the idea is to find a Markov Chain (MC) such that the stationary  distribution of this MC corresponds to the distribution from which we  would like to sample our random variable. Once this MC found, we can  simulate a long enough trajectory over this MC to consider that we have  reach a steady state and then the last value we obtain this way can be  considered as having been drawn from the distribution of interest. Again, in mathematical terms, 
+
+![image-20210613220654255](README_md.assets/image-20210613220654255.png)
+
+![image-20210613220711345](README_md.assets/image-20210613220711345.png)
+
+Although these methods are profound, GANs use the inverse transformation idea. The idea is as follows. We evaluate the CDF F of the given distribution f. We calculate the inverse of this CDF (piece-wise inverse if not differentiable). Let us call this function G. Let U be the uniform distribution between 0 and 1. Then we have,
+
+```
+F(y) = P(Y ≤ y) = P(G(U) ≤ y) = P(U ≤ F(y)) = CDF_uniform(F(y))
+```
+
+This idea can be extended to general functions other than the inverse function. Conceptually, the purpose of the “transform function” is to  deform/reshape the initial probability distribution: the transform  function takes from where the initial distribution is too high compared  to the targeted distribution and puts it where it is too low.   
+
+### Generative Models
+
+We extend the notion of probability to images. Say, for example, we are trying to find the distribution of images of a car. These images can be resized into a `N x N = M` vector. Now, in this space of R<sup>M</sup>, there are certain regions which produce the image of a car when resized.  Therefore, we theorise the existence of a high dimensional probability distributions for a given class of images. 
+
+Now, we can generate a new image from a class by generating a random variable with respect to the probability distribution of that class. Although, we need to note two things here:
+
+- The distribution is a very complex distribution over a high dimensional space
+- Assuming the existence of such an underlying distribution, we cannot express it explicitly
+
+Therefore, it is difficult to implement the previously discussed methods. We tackle this problem by using the **transformation method** with a neural network as the function. As we know pretty well how to generate N uncorrelated uniform random variables, we could make use of the transform method. To do so, we need to express our N dimensional random variable as the result of a very complex function applied to a simple N dimensional random variable.
+
+Finding such a transformation is not as trivial as taking the closed form inverse of the CDF (which is *unknown* too). Therefore, we learn it from the data. We model the transform function by a neural network that takes as input a simple N dimensional uniform random variable and returns as output another N dimensional random variable that follows the probability distribution of the required class. Once the architecture of the network has been designed, we need to train it. There are two ways to train these generative networks, including the idea of adversarial training behind GANs.
+
+![image-20210613233359408](README_md.assets/image-20210613233359408.png)
+
+### Generative Matching Networks
+
+#### Training generative models
+
+We need to train the neural network to express the right transform function. We have a direct training method and an indirect training method. The direct training method consists in comparing the true and the  generated probability distributions and backpropagating the difference  (the error) through the network. This is the idea that rules Generative  Matching Networks (GMNs). For the indirect training method, we do not  directly compare the true and generated distributions. Instead, we train the generative network by making these two distributions go through a  downstream task chosen such that the optimisation process of the  generative network with respect to the downstream task will enforce the  generated distribution to be close to the true distribution. This last  idea is the one behind Generative Adversarial Networks (GANs).
+
+#### Comparing two distributions based on samples
+
+The idea behind GMNs is to directly compare the distributions. However, we do not know how to express explicitly the true distribution. Although, we can compare the distributions based on samples.
+
+In theory, any distance (or similarity measure) able to compare effectively two distributions based on samples can be used, the **Maximum Mean Discrepancy** (MMD) approach is used. Refer to [these slides](http://www.gatsby.ucl.ac.uk/~gretton/papers/testing_workshop.pdf) to learn in detail about the idea behind MMD.
+
+#### Backpropagation of the distribution matching error
+
+We follow the following training process to train the network.
+
+1. Generate some uniform inputs and produce the outputs for these inputs through the network.
+2. Compare the generated distribution via the MMD measure using available samples.
+3. Use backpropagation and gradient descent to train the network.
+
+![image-20210613234402030](README_md.assets/image-20210613234402030.png)
+
+### Generative Adversarial Networks
+
+The brilliant idea that rules GANs consists in replacing this direct  comparison by an indirect one that takes the form of a downstream task  over these two distributions. The training of the generative network is  then done with respect to this task such that it forces the generated  distribution to get closer and closer to the true distribution. 
+
+In theory, both these methods lead to the same optimal generator.
+
+The downstream task of GANs is a discrimination task between true and  generated samples. Or we could say a “non-discrimination” task as we  want the discrimination to fail as much as possible. So, in a GAN  architecture, we have a discriminator, that takes samples of true and  generated data and that try to classify them as well as possible, and a  generator that is trained to fool the discriminator as much as possible. This approach may remind the reader of the EF games in Logic.
+
+Think of the discriminator as an abstract oracle that knows exactly what are the true and generated samples if the difference is stark. If the generator wants to fool the discriminator, it has to bring the generated distribution close to the true one. In practice, we don't have such a discriminator and we would have to implement it. It is obvious that the discriminator is not known. However, it can be learned.
+
+#### The approximation: Adversarial Neural Networks
+
+We now describe the GANs architecture. The generator is a neural network that models a transform function. It takes as input a simple random variable and must return, once  trained, a random variable that follows the targeted distribution. As it is very complicated and unknown, we decide to model the discriminator  with another neural network. This neural network models a discriminative function. It takes as input a point and returns as output the probability of this point to be a “true” one. Once defined, the two networks can be trained simultaneously with opposite goals:
+
+- The goal of the generator is to fool the discriminator, so the generative neural network is trained to maximise the final classification error.
+- The goal of the discriminator is to detect fake generated data, so the  discriminative neural network is trained to minimise the final  classification error
+
+Here, the classification error refers to error with respect to the classification between generated and true samples. So, at each iteration of the training process, the weights of the generative network are updated in order to increase the classification error (error gradient ascent over the generator’s parameters) whereas the weights of the discriminative network are updated so that to  decrease this error (error gradient descent over the discriminator’s  parameters).
+
+![image-20210614000910276](README_md.assets/image-20210614000910276.png)
