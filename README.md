@@ -2,6 +2,8 @@
 
 The SoC 2021 project.
 
+> 28th March - 3rd April
+
 # Useful Links
 
 A Machine Learning course
@@ -13,6 +15,7 @@ Notes on Machine Learning
 
 The main aim is to estimate a linear equation representing the given set
 of data. There are two approaches to this.  
+
 1. A closed form solution.  
 This can be directly obtained by solving the linear differential
 equation. 2. An iterative approach.  
@@ -33,6 +36,8 @@ An article about Gradient Descent
 [here](https://medium.com/@lachlanmiller_52885/machine-learning-week-1-cost-function-gradient-descent-and-univariate-linear-regression-8f5fe69815fd)  
 A useful post on GeeksForGeeks
 [here](https://www.geeksforgeeks.org/gradient-descent-algorithm-and-its-variants/)
+
+> 4th April to 14th April
 
 # Deep Learning
 
@@ -350,7 +355,10 @@ The equations are summarised as:
 This algorithm is extremely fast as it requires only one forward pass and one backward pass. If we were to solve this problem conventionally, we would have proceeded in the following manner. For each weight and bias in the network, we would have calculated the change in the output/cost function with respect to to the change in the parameter being considered. This is basically from the first principles of calculus. Notice that we repeat this process for each weight and bias and the network. If there were a million parameters, we would have million forward and backward passes.  
 The elegancy of Back propagation is visible in this scenario. We calculate the gradients of all parameters in a single go. Therefore, Back Propagation provides an intuitive and simple method to train our network via gradient descent.  
 
-## Chapter 3 - Improving the way neural networks learn  
+> 23rd April to 14th May
+
+## Chapter 3 - Improving the way neural networks learn
+
 Content in this chapter: Improving cost functions - cross-entropy cost function; Regularization methods - L1, L2, dropout, artificial expansion of training data; Weights initializationl Heuristics for hyperparameters.
 
 ### The cross entropy cost function
@@ -367,6 +375,7 @@ For the sigmoid function, σ′(z)=σ(z)(1−σ(z)). Therefore, the gradient bec
 The larger the error, the faster the neuron will learn. This is just what we'd intuitively expect. In particular, it avoids the learning slowdown caused by the σ′(z) term in the analogous equation for the quadratic cost.  
 _Note._ The above works because _BP1_ has the gradient of C multiplied with σ′(z). Therefore, we could come with an intuitive cost function to cancel the σ′(z) part. This is not so easy for the hidden layers where _BP2_ comes in.  
 ![image](https://user-images.githubusercontent.com/52414199/119362828-c20d4f80-bcca-11eb-97b0-d3534dbca371.png)  
+
 We can extend the cross-entropy cost function to multiple neurons in the output layer. Here, _j_ is for the neurons in the output layer and _x_ is for the inputs to output layer neurons.
 ![image](https://user-images.githubusercontent.com/52414199/119361573-70b09080-bcc9-11eb-85da-aa3c14c6c012.png)  
 
@@ -404,7 +413,10 @@ Isn't there a danger we'll end up overfitting to the test_data as well? Do we ne
 
 In general, one of the best ways of reducing overfitting is to increase the size of the training data. With enough training data it is difficult for even a very large network to overfit. Unfortunately, training data can be expensive or difficult to acquire, so this is not always a practical option.
 
+> 16th May to 20th May
+
 ### Regularization
+
 Are there other ways we can reduce the extent to which overfitting occurs? One possible approach is to reduce the size of our network. However, large networks have the potential to be more powerful than small networks, and so this is an option we'd only adopt reluctantly. Fortunately, there are other techniques which can reduce overfitting, even when we have a fixed network and fixed training data. These are known as _regularization_ techniques.  
 
 #### Weight decay or L2 regularization  
@@ -521,8 +533,11 @@ This approach introduces the concept of _velocity_ of the parameters we are tryi
 ![image](https://user-images.githubusercontent.com/52414199/119630175-5216da80-be2c-11eb-863f-767e1df87207.png) 
 In these equations, μ is a hyper-parameter which controls the amount of damping or friction in the system.
 
-I'm skipping Chapter 3 conclusion, Chapter 4 and Chapter 5 here.
+I'm skipping Chapter 4 and Chapter 5 here.
 
+> 20th May to 26th May  - **Learned the basics of PyTorch**
+>
+> 26th May to 31st May
 
 ## Convolution Neural Networks
 
@@ -538,6 +553,8 @@ CNN's are special types of artificial neural networks which expect images as inp
 Applications in Image Recognition, Object Detection and Medical Image Analysis. 
 
 Dilated convolution is similar to Average Pooling + Naive Convolution?  
+
+> 7th June to 12th June
 
 ## ResNet
 
@@ -573,7 +590,9 @@ Here we add an additional parameter w1 whereas no additional parameter is added 
 
 The skip connections in ResNet solve the problem of vanishing gradient  in deep neural networks by allowing this alternate shortcut path for the gradient to flow through. The other way that these connections help is  by allowing the model to learn the identity functions which ensures that the higher layer will perform at least as good as the lower layer, and  not worse.
 
-
+> 15th June to 25th June - **Implemented GAN**
+>
+> 29th June to 2nd July - **Implemented DCGAN**
 
 ## Generative Adversarial Networks (GANs)
 
@@ -660,3 +679,39 @@ We now describe the GANs architecture. The generator is a neural network that mo
 Here, the classification error refers to error with respect to the classification between generated and true samples. So, at each iteration of the training process, the weights of the generative network are updated in order to increase the classification error (error gradient ascent over the generator’s parameters) whereas the weights of the discriminative network are updated so that to  decrease this error (error gradient descent over the discriminator’s  parameters).
 
 ![image-20210614000910276](README_md.assets/image-20210614000910276.png)
+
+From a game theory point of view, we can think of this setting as a  minimax two-players game where the equilibrium state corresponds to the  situation where the generator produces data from the exact targeted  distribution and where the discriminator predicts “true” or “generated”  with probability 1/2 for any point it receives.
+
+> 5th July to 10th July 
+>
+> 10th July to 15th July - **Implemented cGAN for Image Colorization** 
+
+## Conditional GANs
+
+GANs are generative models that learn a mapping from a random noise vector *z* to output image *y*. In contrast, conditional GANs learn a mapping from observed image *x* and a random noise vector *z*, to output image *y*. The generator *G* is trained to produce outputs that cannot be distinguished from "real" images by an adversarially trained discriminator *D* which is trained to do as well as possible at detecting the generator's "fakes". These cGANs can be used in a variety of tasks as mentioned in the [pix2pix](https://arxiv.org/abs/1611.07004) paper. Refer to [this](https://towardsdatascience.com/colorizing-black-white-images-with-u-net-and-conditional-gan-a-tutorial-81b2df111cd8) link for implementation details.
+
+### L\*a\*b color space
+
+In L\*a\*b color space, we have again three numbers for each pixel but  these numbers have different meanings. The first number (channel), **L**, encodes the **Lightness** of each pixel and when we visualise this channel (the second image in the row below) it appears as a black and white image. The **\*a and \*b** channels encode how much **green-red** and **yellow-blue** each pixel is, respectively.  
+
+To train a model for colorization, we should give it a grayscale image  and hope that it will make it colorful. When using L*a*b, we can give  the L channel to the model (which is the grayscale image) and want it to **predict the other two channels** (*a, *b)  and after its prediction, we concatenate all the channels and we get our colorful image. But if you use RGB, you have to **first convert your image to grayscale**, feed the grayscale image to the model and hope **it will predict 3 numbers** for you which is a way more difficult and unstable task due to the many more possible combinations of 3 numbers compared to two numbers. 
+
+The image colorization network uses two losses: **L1 loss**, which makes it a regression task, and an **adversarial (GAN) loss**, which helps to solve the problem in an unsupervised manner.
+
+# Training GANs
+
+If you have tried to train a GAN, you might have encountered all sorts of problems with not much documentation. Here are some things that I have tried which **worked**.
+
+If your GAN is very slow while training, consider the following:
+
+- Make sure you don't transfer tensors from GPU to CPU and vice versa too often. This slows down training **a lot**.
+- A tensor stays in memory until it goes out of scope. Either delete it manually if it has no purpose or declare functions and increase the modularity of your code. This **drastically** reduces the amount of memory used by your code.
+- This is the most important point. A good thumb rule for a Conv2D-BatchNorm2D-ReLU stack is to turn off bias in Conv2D when BatchNorm2D is used. This increases speed upto 3 times.
+
+I had a peculiar error while training this network. The **discriminator loss** was going towards **zero** and the generator's images were nowhere good. To debug this, I tried the following:
+
+- Change the learning rates of discriminator and generator. This had **no effect**.
+- Change the initialization of weights. This had **no effect**.
+- Meddled with various hyperparameters. This had **no effect**.
+- Used soft labels. That is, used *0.9* instead of *1* for real images and vice versa for fake images. This seemed to have an effect on discriminator loss. Although, the generators images were very bad. This had **partial effect**.
+- As a last resort, I checked my code with the template I used. Line by Line. After hours of debugging, I noticed that I had used **detach()** while taking discriminator prediction for generator training. That's it! That was the bug. Removing detach() gave **fantastic results!**.
